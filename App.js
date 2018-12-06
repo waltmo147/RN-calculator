@@ -27,9 +27,75 @@ const instructions = Platform.select({
 export default class App extends Component {
   constructor() {
     super();
-    this.state = {};
-
+    this.state = {
+      resultText: "",
+      calculationText: ""
+    };
+    this.oper = ["C", "DEL", "+", "-", "*", "/"];
     // this.state
+  }
+
+  calculateResult() {
+    const text = this.state.resultText;
+    this.setState({
+      calculationText: eval(text)
+    });
+  }
+
+  validate() {
+    const text = this.state.resultText;
+    switch (text.slice(-1)) {
+      case "+":
+      case "-":
+      case "*":
+      case "/":
+        return false;
+    }
+    return true;
+  }
+
+  buttonPressed(text) {
+    console.log(text);
+    if (text == "=") {
+      return this.validate() && this.calculateResult(this.state.resultText);
+    }
+
+    this.setState({
+      resultText: this.state.resultText + text
+    });
+  }
+
+  operate(operation) {
+    switch (operation) {
+      case "DEL":
+        const text = this.state.resultText.split("");
+        text.pop();
+        this.setState({
+          resultText: text.join("")
+        });
+        break;
+
+      case "C":
+        this.setState({
+          resultText: "",
+          calculationText: ""
+        });
+        break;
+      case "+":
+      case "-":
+      case "*":
+      case "/":
+        const lastChar = this.state.resultText.split("").pop();
+        if (this.oper.indexOf(lastChar) != -1) {
+          return;
+        }
+        if (this.state.text == "") {
+          return;
+        }
+        this.setState({
+          resultText: this.state.resultText + operation
+        });
+    }
   }
 
   render() {
@@ -40,20 +106,31 @@ export default class App extends Component {
       let row = [];
       for (let j = 0; j < 3; j++) {
         row.push(
-          <TouchableOpacity style={styles.btn}>
+          <TouchableOpacity
+            key={nums[i][j]}
+            onPress={() => this.buttonPressed(nums[i][j])}
+            style={styles.btn}
+          >
             <Text style={styles.btntext}>{nums[i][j]}</Text>
           </TouchableOpacity>
         );
       }
-      rows.push(<View style={styles.row}>{row}</View>);
+      rows.push(
+        <View key={i} style={styles.row}>
+          {row}
+        </View>
+      );
     }
 
-    let oper = ["+", "-", "*", "/"];
     let ops = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 6; i++) {
       ops.push(
-        <TouchableOpacity style={styles.btn}>
-          <Text style={styles.white}>{oper[i]}</Text>
+        <TouchableOpacity
+          key={this.oper[i]}
+          style={styles.btn}
+          onPress={() => this.operate(this.oper[i])}
+        >
+          <Text style={styles.white}>{this.oper[i]}</Text>
         </TouchableOpacity>
       );
     }
@@ -61,10 +138,12 @@ export default class App extends Component {
     return (
       <View style={styles.container}>
         <View style={styles.result}>
-          <Text style={styles.resultText}>11 * 11</Text>
+          <Text style={styles.resultText}>{this.state.resultText}</Text>
         </View>
         <View style={styles.calculation}>
-          <Text style={styles.calculationText}>11 * 11</Text>
+          <Text style={styles.calculationText}>
+            {this.state.calculationText}
+          </Text>
         </View>
         <View style={styles.buttons}>
           <View style={styles.numbers}>{rows}</View>
@@ -87,19 +166,20 @@ const styles = StyleSheet.create({
   },
   resultText: {
     fontSize: 35,
-    color: "white"
+    color: "black"
   },
   calculationText: {
     fontSize: 27,
-    color: "white"
+    color: "black"
   },
 
   btntext: {
-    fontSize: 30
+    fontSize: 30,
+    color: "white"
   },
   white: {
     color: "white",
-    fontSize: 30
+    fontSize: 25
   },
   row: {
     flexDirection: "row",
@@ -109,13 +189,13 @@ const styles = StyleSheet.create({
   },
   result: {
     flex: 2,
-    backgroundColor: "red",
+    backgroundColor: "white",
     justifyContent: "center",
     alignItems: "flex-end"
   },
   calculation: {
     flex: 1,
-    backgroundColor: "green",
+    backgroundColor: "white",
     justifyContent: "center",
     alignItems: "flex-end"
   },
@@ -125,12 +205,12 @@ const styles = StyleSheet.create({
   },
   numbers: {
     flex: 3,
-    backgroundColor: "yellow"
+    backgroundColor: "#4c4c4c"
   },
 
   operations: {
     flex: 1,
     justifyContent: "space-around",
-    backgroundColor: "black"
+    backgroundColor: "#636363"
   }
 });
